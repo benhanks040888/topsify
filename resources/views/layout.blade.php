@@ -8,7 +8,8 @@
   <meta name="csrf-token" content="{{ csrf_token() }}">
   <link href="https://fonts.googleapis.com/css?family=Raleway:100,600" rel="stylesheet" type="text/css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.0/css/bulma.min.css">
-  <script defer src="https://use.fontawesome.com/releases/v5.0.7/js/all.js"></script>
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.11/css/solid.css" integrity="sha384-XmxkDmPXx/Hc19URgeNR9YRtH392uNsw0o7nb6dfZieETZuPI2mz5E41KhXKMqWQ" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.11/css/fontawesome.css" integrity="sha384-JrS00hUlxRW4kN+mi4N+nYNvl2brci75f8X1VBQh/DbA/XIA2u8i3LLLxB68iE3R" crossorigin="anonymous">
   @yield('styles')
 </head>
 <body>

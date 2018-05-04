@@ -20,3 +20,5 @@ Route::get('/auth/spotify', 'AuthSpotifyController@spotifyCallback');
 Route::get('/result', 'AuthSpotifyController@getResult');
 
 Route::get('/top-tracks', 'AuthSpotifyController@getTopTracksAjax')->name('top-tracks');
+
+Route::post('/create-playlist', 'AuthSpotifyController@postCreatePlaylist')->name('playlist.create');

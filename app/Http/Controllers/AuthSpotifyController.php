@@ -17,7 +17,7 @@ class AuthSpotifyController extends Controller
     public function spotifyLogin()
     {
         return Socialite::driver('spotify')
-                        ->scopes(['user-top-read'])
+                        ->scopes(['user-top-read', 'playlist-modify-public'])
                         ->redirect();
     }
 
@@ -55,6 +55,58 @@ class AuthSpotifyController extends Controller
         catch(\SpotifyWebAPI\SpotifyWebAPIException $e) {
             // handle error
             return redirect('/');
+        }
+    }
+
+    public function postCreatePlaylist(SpotifyWebAPI $spotify, Request $request)
+    {
+        try {
+            $type = $request->input('type', 'short_term');
+
+            switch ($type) {
+                case 'short_term':
+                    $type_label = 'Last 4 Weeks';
+                    break;
+                
+                case 'medium_term':
+                    $type_label = 'Last 4 Months';
+                    break;
+
+                case 'long_term':
+                    $type_label = 'Last Couple of Years';
+                    break;
+
+                default:
+                    $type_label = '';
+                    break;
+            }
+
+            $top_tracks = $spotify->getMyTop('tracks', [
+                'limit' => 50,
+                'time_range' => $type
+            ]);
+
+            $top_tracks_id = collect($top_tracks->items)->pluck('id');
+
+            $me = $spotify->me();
+
+            $new_playlist = $spotify->createUserPlaylist($me->id, [
+                'name' => 'Your Top Songs ' . $type_label
+            ]);
+
+            $spotify->addUserPlaylistTracks($me->id, $new_playlist->id, $top_tracks_id->toArray());
+            // $spotify->addUserPlaylistTracks($me->id, '2C8NJE5XwsC0MDXkBQa9L4', $top_tracks_id->toArray());
+            return response()->json($new_playlist);
+        }
+        catch(\SpotifyWebAPI\SpotifyWebAPIException $e) {
+            if ($request->ajax()) {
+                return response()->json([
+                    'status' => $e->getCode(),
+                    'message' => $e->getMessage()
+                ]);
+            } else {
+                return redirect('/');
+            }
         }
     }
 
