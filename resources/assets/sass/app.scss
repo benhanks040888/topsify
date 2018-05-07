@@ -1,14 +1,41 @@
 
 // Fonts
-@import url("https://fonts.googleapis.com/css?family=Raleway:300,400,600");
+// @import url("https://fonts.googleapis.com/css?family=Raleway:300,400,600");
 
 // Variables
 @import "variables";
 
 // Bootstrap
-@import '~bootstrap/scss/bootstrap';
+// @import '~bootstrap/scss/bootstrap';
 
 .navbar-laravel {
   background-color: #fff;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+}
+
+
+[v-cloak] * { display:none }
+[v-cloak]::before { content: "loading…" }
+
+.box {
+  transition: all 1s;
+  display: block;
+  width: 100%;
+}
+.box {
+  padding: 10px;
+  box-shadow: 0 1px 0 rgba(10, 10, 10, .1);
+  border-radius: 0;
+}
+.box:not(:last-child) {
+  margin-bottom: .5rem;
+}
+.flip-list-enter, .flip-list-leave-to {
+  opacity: 0;
+  transform: translateY(30px);
+}
+.flip-list-leave-active {
+  opacity: 0;
+  transition: opacity .2s, transform 1s;
+  position: absolute;
 }
