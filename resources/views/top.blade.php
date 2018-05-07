@@ -143,8 +143,6 @@
             return false;
           }
 
-          this.isCreatingPlaylist = true;
-
           var self = this;
 
           swal({
@@ -155,6 +153,8 @@
             confirmButtonText: 'Create Playlist',
             showLoaderOnConfirm: true,
             preConfirm: function (title) {
+              self.isCreatingPlaylist = true;
+
               axios.post("{{ route('playlist.create') }}", {
                 type: self.type,
                 title: title
