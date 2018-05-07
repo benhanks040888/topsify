@@ -33,47 +33,48 @@
 @section('content')
   <div id="top_tracks" v-cloak>
     <h2 class="title">Your Spotify Top 50 @{{ typeLabel }} (Approximately)</h2>
-    <div class="control has-icons-left">
-      <div class="form-group select is-rounded is-medium">
-        <select name="type" class="form-control" @change="setType">
-          <option value="short_term">Short Term</option>
-          <option value="medium_term">Medium Term</option>
-          <option value="long_term">Long Term</option>
-        </select>
+    <div class="level">
+      <div class="level-left">
+        <div class="control has-icons-left">
+          <div class="form-group select is-rounded is-medium">
+            <select name="type" class="form-control" @change="setType">
+              <option value="short_term">Short Term</option>
+              <option value="medium_term">Medium Term</option>
+              <option value="long_term">Long Term</option>
+            </select>
+          </div>
+          <span class="icon is-small is-left">
+            <i :class="['fas', typeIcon]"></i>
+          </span>
+        </div>
       </div>
-      <span class="icon is-small is-left">
-        <i :class="['fas', typeIcon]"></i>
-      </span>
+      <div class="level-right">
+        <a class="button is-link js-create-playlist" href="#" v-if="!createdPlaylist" @click="createPlaylist">Create This Playlist</a>
+    
+        <a class="button is-primary" v-if="createdPlaylist" :href="createdPlaylist" target="_blank">Play This Playlist</a>
+      </div>
     </div>
 
-    <a class="button js-create-playlist" href="#" @click="createPlaylist">Create This Playlist</a>
 
-    <a class="button" v-if="createdPlaylist" :href="createdPlaylist" target="_blank">Play This Playlist</a>
-
-    <div class="section">
-      <transition-group name="flip-list" tag="div">
-        <div class="box" v-for="(item, index) in top_tracks" :key="item.id">
-          <div class="columns">
-            <div class="column is-narrow has-text-grey has-text-centered">
-              <div class="is-size-5" style="color: #000">
-                <span>@{{ index + 1 }}</span>
-              </div>
-              <div class="is-size-7">
-                <span class="is-size-7"><i :class="['fas', getArrowIcon(index + 1, getLastTermPosition(item.id))]"></i></span> 
-                @{{ getLastTermPosition(item.id) }}
-              </div>
-              <!-- <span class="is-size-7">THIS TERM</span> -->
-              <!-- <span class="has-text-grey">Last term: @{{ getLastTermPosition(item.id) }}</span> -->
+    <transition-group name="flip-list" tag="div" class="a">
+      <div class="box" v-for="(item, index) in top_tracks" :key="item.id">
+        <div class="columns is-mobile">
+          <div class="column is-narrow has-text-grey has-text-centered" style="min-width: 80px;">
+            <div class="is-size-3" style="color: #000">
+              <span>@{{ index + 1 }}</span>
             </div>
-            
-            <div class="column is-narrow">
-              <img :src="item.album.images[2].url" :alt="item.album.name + 'Album image'">
+            <div class="is-size-7">
+              <span class="is-size-7"><i :class="['fas', getArrowIcon(index + 1, getLastTermPosition(item.id))]"></i></span> @{{ getLastTermPositionLabel(getLastTermPosition(item.id)) }}
             </div>
-            <div class="column">
-              <div class="title has-text-weight-light">@{{ item.name }}</div>
-              <div class="subtitle is-6 has-text-grey">
-                @{{ getArtistsName(item.artists) }}
-              </div>
+          </div>
+          
+          <div class="column is-narrow">
+            <img :src="item.album.images[2].url" :alt="item.album.name + 'Album image'">
+          </div>
+          <div class="column">
+            <div class="title has-text-weight-light">@{{ item.name }}</div>
+            <div class="subtitle is-6 has-text-grey">
+              @{{ getArtistsName(item.artists) }}
             </div>
           </div>
         </div>
@@ -86,6 +87,9 @@
   <script src="https://cdn.jsdelivr.net/npm/vue@2.5.16/dist/vue.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/lodash@4.17.10/lodash.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.min.js"></script>
+  {{-- <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script> --}}
+  <script src="https://unpkg.com/sweetalert2@7.19.3/dist/sweetalert2.all.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/promise-polyfill@7.1.0/dist/promise.min.js"></script>
   <script>
     var top_tracks_short_data = {!! json_encode($top_tracks_short) !!};
     var top_tracks_medium_data = {!! json_encode($top_tracks_medium) !!};
@@ -141,13 +145,40 @@
 
           this.isCreatingPlaylist = true;
 
-          axios.post("{{ route('playlist.create') }}", {
-            type: this.type
-          })
-          .then(function (response) {
-            this.createdPlaylist = response.data.external_urls.spotify;
-            this.isCreatingPlaylist = false;
-          }.bind(this));
+          var self = this;
+
+          swal({
+            title: 'Name your playlist',
+            input: 'text',
+            inputValue: 'Your Top Songs ' + self.typeLabel,
+            showCancelButton: true,
+            confirmButtonText: 'Create Playlist',
+            showLoaderOnConfirm: true,
+            preConfirm: function (title) {
+              axios.post("{{ route('playlist.create') }}", {
+                type: self.type,
+                title: title
+              })
+              .then(function (response) {
+                self.createdPlaylist = response.data.external_urls.spotify;
+                self.isCreatingPlaylist = false;
+              })
+              .catch(function(error) {
+                swal.showValidationError(
+                  'Request failed: ' + error
+                );
+              })
+            },
+            allowOutsideClick: function () {
+              return !swal.isLoading();
+            }
+          }).then(function(result) {
+            if (result.value) {
+              swal({
+                title: 'Playlist created! Enjoy!'
+              })
+            }
+          });
         },
         getArtistsName: function (artists) {
           if (artists.length <= 0) {
@@ -168,6 +199,9 @@
           } else {
             return 'has-text-warning fa-star';
           }
+        },
+        getLastTermPositionLabel: function(position) {
+          return position != 'NEW' ? '(' + position + ')' : position;
         },
         getLastTermPosition: function(itemId) {
           if (this.type == 'short_term') {

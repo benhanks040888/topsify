@@ -81,6 +81,8 @@ class AuthSpotifyController extends Controller
                     break;
             }
 
+            $playlist_name = $request->input('title', 'Your Top Songs ' . $type_label);
+
             $top_tracks = $spotify->getMyTop('tracks', [
                 'limit' => 50,
                 'time_range' => $type
@@ -91,7 +93,7 @@ class AuthSpotifyController extends Controller
             $me = $spotify->me();
 
             $new_playlist = $spotify->createUserPlaylist($me->id, [
-                'name' => 'Your Top Songs ' . $type_label
+                'name' => $playlist_name
             ]);
 
             $spotify->addUserPlaylistTracks($me->id, $new_playlist->id, $top_tracks_id->toArray());
