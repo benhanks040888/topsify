@@ -2,6 +2,13 @@
 
 @section('styles')
   <style>
+    a {
+      color: #65D36E;
+    }
+
+    a:hover {
+      color: #3f8445;
+    }
     [v-cloak] * { display:none }
     [v-cloak]::before { content: "loading…" }
 
@@ -32,15 +39,16 @@
 
 @section('content')
   <div id="top_tracks" v-cloak>
-    <h2 class="title">Your Spotify Top 50 @{{ typeLabel }} (Approximately)</h2>
+    <h1 class="title">Your Top 50 Chart @{{ typeLabel }}</h1>
     <div class="level">
       <div class="level-left">
         <div class="control has-icons-left">
-          <div class="form-group select is-rounded is-medium">
+          <div class="form-group select is-rounded">
             <select name="type" class="form-control" @change="setType">
-              <option value="short_term">Short Term</option>
+              <option :value="key" v-for="(type, key) in types">@{{ type.label }}</option>
+              {{-- <option value="short_term">Short Term</option>
               <option value="medium_term">Medium Term</option>
-              <option value="long_term">Long Term</option>
+              <option value="long_term">Long Term</option> --}}
             </select>
           </div>
           <span class="icon is-small is-left">
@@ -60,7 +68,7 @@
       <div class="box" v-for="(item, index) in top_tracks" :key="item.id">
         <div class="columns is-mobile">
           <div class="column is-narrow has-text-grey has-text-centered" style="min-width: 80px;">
-            <div class="is-size-3" style="color: #000">
+            <div class="is-size-5" style="color: #000">
               <span>@{{ index + 1 }}</span>
             </div>
             <div class="is-size-7">
@@ -69,10 +77,14 @@
           </div>
           
           <div class="column is-narrow">
-            <img :src="item.album.images[2].url" :alt="item.album.name + 'Album image'">
+            <figure class="image is-48x48">
+              <img :src="item.album.images[2].url" :alt="item.album.name + 'Album image'">
+            </figure>
           </div>
           <div class="column">
-            <div class="title has-text-weight-light">@{{ item.name }}</div>
+            <div class="title is-5 has-text-weight-normal">
+              <a :href="item.external_urls.spotify" target="_blank">@{{ item.name }}</a>
+            </div>
             <div class="subtitle is-6 has-text-grey">
               @{{ getArtistsName(item.artists) }}
             </div>
@@ -148,7 +160,7 @@
           swal({
             title: 'Name your playlist',
             input: 'text',
-            inputValue: 'Your Top Songs ' + self.typeLabel,
+            inputValue: 'Your Top 50 Chart ' + self.typeLabel,
             showCancelButton: true,
             confirmButtonText: 'Create Playlist',
             showLoaderOnConfirm: true,
